@@ -17,8 +17,8 @@ panic_abort = { path = "../panic_abort" }
 
 # not actually used but needed to always have these in the sysroot
 proc_macro = { path = "../proc_macro" }
-global_allocator = { path = "../global_allocator" } # mattmatt does this conflict with external allocator
-alloc_error_handler = { path = "../alloc_error_handler"} # mattmatt does this conflict with external allocator
+global_allocator = { path = "../global_allocator", optional = true } # mattmatt does this conflict with external allocator
+alloc_error_handler = { path = "../alloc_error_handler", optional = true } # mattmatt does this conflict with external allocator
 
 # Forward features to the `std` crate as necessary
 [features]
@@ -36,3 +36,4 @@ profiler = ["std/profiler"]
 std_detect_file_io = ["std/std_detect_file_io"]
 std_detect_dlsym_getauxval = ["std/std_detect_dlsym_getauxval"]
 std_detect_env_override = ["std/std_detect_env_override"]
+unified-sysroot-injection = ["dep:global_allocator", "dep:alloc_error_handler", "std/unified-sysroot-injection"]

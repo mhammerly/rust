@@ -345,6 +345,7 @@ fn default_alloc_error_hook(layout: Layout) {
 }
 
 #[cfg(not(test))]
+#[cfg(not(feature = "unified-sysroot-injection"))]
 #[doc(hidden)]
 #[alloc_error_handler]
 #[unstable(feature = "alloc_internals", issue = "none")]
@@ -357,6 +358,7 @@ pub fn rust_oom(layout: Layout) -> ! {
 }
 
 #[cfg(not(test))]
+#[cfg(not(feature = "unified-sysroot-injection"))]
 #[doc(hidden)]
 #[allow(unused_attributes)]
 #[unstable(feature = "alloc_internals", issue = "none")]
