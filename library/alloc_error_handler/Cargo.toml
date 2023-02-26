@@ -1,0 +1,21 @@
+[package]
+name = "alloc_error_handler"
+version = "0.0.0"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rust-lang/rust.git"
+description = "The Rust Standard Library - Default alloc error handler"
+edition = "2021"
+
+[lib]
+crate-type = ["rlib"] # mattmatt add dylib after dylib changes in?
+
+[dependencies]
+alloc = { path = "../alloc" }
+compiler_builtins = { version = "0.1.40", features = ['rustc-dep-of-std'] }
+core = { path = "../core" }
+
+[features]
+compiler-builtins-mem = ['compiler_builtins/mem']
+compiler-builtins-c = ["compiler_builtins/c"]
+compiler-builtins-no-asm = ["compiler_builtins/no-asm"]
+compiler-builtins-mangled-names = ["compiler_builtins/mangled-names"]

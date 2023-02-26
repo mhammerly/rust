@@ -1,0 +1,15 @@
+[package]
+name = "global_allocator"
+version = "0.0.0"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rust-lang/rust.git"
+description = "The Rust Standard Library - Default global allocator"
+edition = "2021"
+
+[lib]
+crate-type = ["rlib"] # mattmatt add dylib after dylib changes in
+
+[dependencies]
+std = { path = "../std" }
+panic_unwind = { path = "../panic_unwind" } # mattmatt why can't i make this optional
+panic_abort = { path = "../panic_abort" } # panics should be unnecessary after dylib change

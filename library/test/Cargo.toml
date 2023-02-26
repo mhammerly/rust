@@ -15,8 +15,10 @@ libc = { version = "0.2", default-features = false }
 panic_unwind = { path = "../panic_unwind" }
 panic_abort = { path = "../panic_abort" }
 
-# not actually used but needed to always have proc_macro in the sysroot
+# not actually used but needed to always have these in the sysroot
 proc_macro = { path = "../proc_macro" }
+global_allocator = { path = "../global_allocator" } # mattmatt does this conflict with external allocator
+alloc_error_handler = { path = "../alloc_error_handler"} # mattmatt does this conflict with external allocator
 
 # Forward features to the `std` crate as necessary
 [features]

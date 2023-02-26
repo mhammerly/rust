@@ -800,7 +800,13 @@ impl<'a> CrateLoader<'a> {
         }
     }
 
-    fn inject_allocator_crate(&mut self, krate: &ast::Crate) {
+    pub fn find_allocator_crates(
+        &mut self,
+        krate: &ast::Crate,
+    ) -> Option<(Option<Symbol>, Option<Symbol>)> {
+        // First we check if the local crate defines a global allocator or allocator error handler.
+        // mattmatt I extracted this logic to a separate function but don't want to get rid of this
+        // side effect. Not sure if new behavior needs it, but old behavior had it
         self.cstore.has_global_allocator = match &*global_allocator_spans(&self.sess, krate) {
             [span1, span2, ..] => {
                 self.sess.emit_err(errors::NoMultipleGlobalAlloc { span2: *span2, span1: *span1 });
@@ -823,7 +829,7 @@ impl<'a> CrateLoader<'a> {
         if !self.sess.contains_name(&krate.attrs, sym::needs_allocator)
             && !self.cstore.iter_crate_data().any(|(_, data)| data.needs_allocator())
         {
-            return;
+            return None;
         }
 
         // At this point we've determined that we need an allocator. Let's see
@@ -831,13 +837,18 @@ impl<'a> CrateLoader<'a> {
         // we're emitting.
         let all_rlib = self.sess.crate_types().iter().all(|ct| matches!(*ct, CrateType::Rlib));
         if all_rlib {
-            return;
+            return None;
         }
 
-        // Ok, we need an allocator. Not only that but we're actually going to
-        // create an artifact that needs one linked in. Let's go find the one
-        // that we're going to link in.
-        //
+        // When this flag is enabled, we always use a global allocator. Either one is
+        // provided by the user, or we inject a dependency on the `global_allocator` sysroot crate.
+        // If the `#[global_allocator]` attribute is made to generate `__rustc_*` symbols directly,
+        // this can be removed.
+        if self.sess.opts.unstable_opts.unified_sysroot_injection {
+            self.cstore.allocator_kind = Some(AllocatorKind::Global);
+            self.cstore.alloc_error_handler_kind = Some(AllocatorKind::Global);
+        }
+
         // First up we check for global allocators. Look at the crate graph here
         // and see what's a global allocator, including if we ourselves are a
         // global allocator.
@@ -872,27 +883,39 @@ impl<'a> CrateLoader<'a> {
             }
         }
 
-        if global_allocator.is_some() {
-            self.cstore.allocator_kind = Some(AllocatorKind::Global);
-        } else {
-            // Ok we haven't found a global allocator but we still need an
-            // allocator. At this point our allocator request is typically fulfilled
-            // by the standard library, denoted by the `#![default_lib_allocator]`
-            // attribute.
-            if !self.sess.contains_name(&krate.attrs, sym::default_lib_allocator)
-                && !self.cstore.iter_crate_data().any(|(_, data)| data.has_default_lib_allocator())
-            {
-                self.sess.emit_err(errors::GlobalAllocRequired);
-            }
-            self.cstore.allocator_kind = Some(AllocatorKind::Default);
-        }
+        Some((global_allocator, alloc_error_handler))
+    }
 
-        if alloc_error_handler.is_some() {
-            self.cstore.alloc_error_handler_kind = Some(AllocatorKind::Global);
-        } else {
-            // The alloc crate provides a default allocation error handler if
-            // one isn't specified.
-            self.cstore.alloc_error_handler_kind = Some(AllocatorKind::Default);
+    /// Determines whether an allocator shim is required and, if so, what type. The shim will be
+    /// generated later during codegen and included in linked output. This does not run if the
+    /// `-Z unified_sysroot_injection` flag is enabled.
+    fn inject_allocator_crate(&mut self, krate: &ast::Crate) {
+        if let Some((global_allocator, alloc_error_handler)) = self.find_allocator_crates(krate) {
+            if global_allocator.is_some() {
+                self.cstore.allocator_kind = Some(AllocatorKind::Global);
+            } else {
+                // Ok we haven't found a global allocator but we still need an
+                // allocator. At this point our allocator request is typically fulfilled
+                // by the standard library, denoted by the `#![default_lib_allocator]`
+                // attribute.
+                if !self.sess.contains_name(&krate.attrs, sym::default_lib_allocator)
+                    && !self
+                        .cstore
+                        .iter_crate_data()
+                        .any(|(_, data)| data.has_default_lib_allocator())
+                {
+                    self.sess.emit_err(errors::GlobalAllocRequired);
+                }
+                self.cstore.allocator_kind = Some(AllocatorKind::Default);
+            }
+
+            if alloc_error_handler.is_some() {
+                self.cstore.alloc_error_handler_kind = Some(AllocatorKind::Global);
+            } else {
+                // The alloc crate provides a default allocation error handler if
+                // one isn't specified.
+                self.cstore.alloc_error_handler_kind = Some(AllocatorKind::Default);
+            }
         }
     }
 
@@ -974,7 +997,13 @@ impl<'a> CrateLoader<'a> {
 
     pub fn postprocess(&mut self, krate: &ast::Crate) {
         self.inject_profiler_runtime(krate);
-        self.inject_allocator_crate(krate);
+
+        // When this flag is enabled, these injections happen during AST expansion alongside
+        // injections of std/core, test, and proc_macro.
+        if !self.sess.opts.unstable_opts.unified_sysroot_injection {
+            self.inject_allocator_crate(krate);
+        }
+
         self.inject_panic_runtime(krate);
 
         self.report_unused_deps(krate);
