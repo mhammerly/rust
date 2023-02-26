@@ -835,8 +835,13 @@ impl<'a> CrateLoader<'a> {
         // At this point we've determined that we need an allocator. Let's see
         // if our compilation session actually needs an allocator based on what
         // we're emitting.
-        let all_rlib = self.sess.crate_types().iter().all(|ct| matches!(*ct, CrateType::Rlib));
-        if all_rlib {
+        let needs_allocator_predicate = if self.sess.opts.unstable_opts.incomplete_dylibs {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib) && !matches!(*ct, CrateType::Dylib)
+        } else {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib)
+        };
+        let needs_allocator = self.sess.crate_types().iter().any(needs_allocator_predicate);
+        if !needs_allocator {
             return None;
         }
 

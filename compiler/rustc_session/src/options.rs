@@ -1364,6 +1364,8 @@ options! {
         "generate human-readable, predictable names for codegen units (default: no)"),
     identify_regions: bool = (false, parse_bool, [UNTRACKED],
         "display unnamed regions as `'<id>`, using a non-ident unique id (default: no)"),
+    incomplete_dylibs: bool = (false, parse_bool, [TRACKED],
+        "build dylib crates (not cdylib) without injecting allocator and panic implementations, mirroring rlib"),
     incremental_ignore_spans: bool = (false, parse_bool, [TRACKED],
         "ignore spans during ICH computation -- used for testing (default: no)"),
     incremental_info: bool = (false, parse_bool, [UNTRACKED],
