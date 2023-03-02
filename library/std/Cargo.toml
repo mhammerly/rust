@@ -6,6 +6,9 @@ repository = "https://github.com/rust-lang/rust.git"
 description = "The Rust Standard Library"
 edition = "2021"
 
+# [build]
+# rustflags = ["-C", "prefer-dynamic"] # mattmatt probably bad
+
 [lib]
 crate-type = ["dylib", "rlib"]
 
@@ -74,7 +77,7 @@ panic_immediate_abort = ["core/panic_immediate_abort"]
 std_detect_file_io = ["std_detect/std_detect_file_io"]
 std_detect_dlsym_getauxval = ["std_detect/std_detect_dlsym_getauxval"]
 std_detect_env_override = ["std_detect/std_detect_env_override"]
-unified-sysroot-injection = []
+unified-sysroot-injection = ["core/unified-sysroot-injection"]
 
 [package.metadata.fortanix-sgx]
 # Maximum possible number of threads when testing

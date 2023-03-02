@@ -566,6 +566,7 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         needs_panic_runtime, Normal, template!(Word), WarnFollowing,
         experimental!(needs_panic_runtime)
     ),
+    gated!(needs_panic_handler, Normal, template!(Word), WarnFollowing, experimental!(needs_panic_handler)),
     gated!(
         compiler_builtins, Normal, template!(Word), WarnFollowing,
         "the `#[compiler_builtins]` attribute is used to identify the `compiler_builtins` crate \

@@ -519,6 +519,7 @@ pub fn panicking() -> bool {
 
 /// Entry point of panics from the core crate (`panic_impl` lang item).
 #[cfg(not(test))]
+#[cfg(any(bootstrap, not(feature = "unified-sysroot-injection")))]
 #[panic_handler]
 pub fn begin_panic_handler(info: &PanicInfo<'_>) -> ! {
     struct PanicPayload<'a> {
@@ -646,7 +647,8 @@ pub const fn begin_panic<M: Any + Send>(msg: M) -> ! {
 /// Executes the primary logic for a panic, including checking for recursive
 /// panics, panic hooks, and finally dispatching to the panic runtime to either
 /// abort or unwind.
-fn rust_panic_with_hook(
+#[stable(feature = "panic_hooks", since = "1.10.0")] // mattmatt cheating
+pub fn rust_panic_with_hook(
     payload: &mut dyn BoxMeUp,
     message: Option<&fmt::Arguments<'_>>,
     location: &Location<'_>,

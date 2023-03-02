@@ -72,6 +72,9 @@ dependencies = [
  "alloc",
  "compiler_builtins",
  "core",
+ "panic_abort",
+ "panic_unwind",
+ "std",
 ]
 
 [[package]]
@@ -2949,6 +2952,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "panic_handler"
+version = "0.0.0"
+dependencies = [
+ "core",
+ "panic_abort",
+ "panic_unwind",
+ "std",
+]
+
+[[package]]
 name = "panic_unwind"
 version = "0.0.0"
 dependencies = [
@@ -5558,6 +5571,7 @@ dependencies = [
  "global_allocator",
  "libc",
  "panic_abort",
+ "panic_handler",
  "panic_unwind",
  "proc_macro",
  "std",

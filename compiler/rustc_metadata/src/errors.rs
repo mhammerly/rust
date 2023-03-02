@@ -342,6 +342,16 @@ pub struct NotProfilerRuntime {
 }
 
 #[derive(Diagnostic)]
+#[diag(metadata_no_multiple_panic_handlers)]
+pub struct NoMultiplePanicHandlers {
+    #[primary_span]
+    #[label]
+    pub span2: Span,
+    #[label(metadata_prev_panic_handlers)]
+    pub span1: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag(metadata_no_multiple_global_alloc)]
 pub struct NoMultipleGlobalAlloc {
     #[primary_span]
@@ -359,6 +369,13 @@ pub struct NoMultipleAllocErrorHandler {
     pub span2: Span,
     #[label(metadata_prev_alloc_error_handler)]
     pub span1: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(metadata_conflicting_panic_handler)]
+pub struct ConflictingPanicHandler {
+    pub crate_name: Symbol,
+    pub other_crate_name: Symbol,
 }
 
 #[derive(Diagnostic)]

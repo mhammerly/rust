@@ -180,6 +180,18 @@
 #![feature(const_is_char_boundary)]
 #![feature(const_cstr_methods)]
 #![feature(is_ascii_octdigit)]
+#![cfg_attr(
+    all(not(bootstrap), feature = "unified-sysroot-injection"),
+    feature(needs_panic_handler)
+)]
+#![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), needs_panic_handler)]
+// core is built as a dylib, meaning std will no longer generate an allocator shim during
+// bootstrap as something in its crate graph has shared linkage. so, during bootstrap, make core
+// generate a default allocator shim as a hack, and then build the new hookups in stage1
+// #![cfg_attr(all(bootstrap, feature = "unified-sysroot-injection"), needs_allocator)]
+// #![cfg_attr(all(bootstrap, feature = "unified-sysroot-injection"), feature(allocator_internals))]
+// #![cfg_attr(all(bootstrap, feature = "unified-sysroot-injection"), default_lib_allocator)]
+
 //
 // Language features:
 #![feature(abi_unadjusted)]

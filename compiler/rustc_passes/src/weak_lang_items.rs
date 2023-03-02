@@ -42,15 +42,26 @@ pub fn check_crate(tcx: TyCtxt<'_>, items: &mut lang_items::LanguageItems) {
 
 fn verify(tcx: TyCtxt<'_>, items: &lang_items::LanguageItems) {
     // We only need to check for the presence of weak lang items if we're
-    // emitting something that's not an rlib.
-    let needs_check = tcx.sess.crate_types().iter().any(|kind| match *kind {
-        CrateType::Dylib
-        | CrateType::ProcMacro
-        | CrateType::Cdylib
-        | CrateType::Executable
-        | CrateType::Staticlib => true,
-        CrateType::Rlib => false,
-    });
+    // emitting something that's not an rlib. If `-Z incomplete_dylibs` is enabled, we also don't
+    // need to check dylibs.
+    let needs_check = if !tcx.sess.opts.unstable_opts.incomplete_dylibs {
+        tcx.sess.crate_types().iter().any(|kind| match *kind {
+            CrateType::Dylib
+            | CrateType::ProcMacro
+            | CrateType::Cdylib
+            | CrateType::Executable
+            | CrateType::Staticlib => true,
+            CrateType::Rlib => false,
+        })
+    } else {
+        tcx.sess.crate_types().iter().any(|kind| match *kind {
+            CrateType::ProcMacro
+            | CrateType::Cdylib
+            | CrateType::Executable
+            | CrateType::Staticlib => true,
+            CrateType::Rlib | CrateType::Dylib => false,
+        })
+    };
     if !needs_check {
         return;
     }

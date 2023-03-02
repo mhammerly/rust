@@ -213,6 +213,8 @@ declare_features! (
     (active, link_llvm_intrinsics, "1.0.0", Some(29602), None),
     /// Allows using the `#[linkage = ".."]` attribute.
     (active, linkage, "1.0.0", Some(29603), None),
+    /// Allows declaring with `#![needs_panic_handler]` that a panic handler is needed.
+    (active, needs_panic_handler, "1.69.0", None, None), // mattmatt needs tracking issue
     /// Allows declaring with `#![needs_panic_runtime]` that a panic runtime is needed.
     (active, needs_panic_runtime, "1.10.0", Some(32837), None),
     /// Allows using the `#![panic_runtime]` attribute.

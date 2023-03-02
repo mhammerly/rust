@@ -1,9 +1,9 @@
 [package]
-name = "global_allocator"
+name = "panic_handler"
 version = "0.0.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/rust-lang/rust.git"
-description = "The Rust Standard Library - Default global allocator"
+description = "The Rust Standard Library - Default panic handler"
 edition = "2021"
 
 [lib]
@@ -11,6 +11,7 @@ crate-type = ["rlib", "dylib"]
 
 [dependencies]
 std = { path = "../std" }
+core = { path = "../core" }
 panic_unwind = { path = "../panic_unwind", optional = true }
 panic_abort = { path = "../panic_abort" }
 

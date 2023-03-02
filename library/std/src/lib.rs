@@ -359,7 +359,7 @@
 #![feature(const_ipv4)]
 #![feature(const_ipv6)]
 #![feature(thread_local_internals)]
-#![cfg_attr(not(feature = "unified-sysroot-injection"), default_lib_allocator)]
+#![cfg_attr(any(bootstrap, not(feature = "unified-sysroot-injection")), default_lib_allocator)]
 
 // Explicitly import the prelude. The compiler uses this same unstable attribute
 // to import the prelude implicitly when building crates that depend on std.
@@ -589,11 +589,21 @@ pub use std_detect::is_x86_feature_detected;
 mod sys;
 mod sys_common;
 
+// mattmatt
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+#[stable(feature = "panic_hooks", since = "1.10.0")] // mattmatt cheating
+pub use sys_common::backtrace::__rust_end_short_backtrace;
+
 pub mod alloc;
 
 // Private support modules
 mod panicking;
 mod personality;
+
+// mattmatt
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+#[stable(feature = "panic_hooks", since = "1.10.0")] // mattmatt cheating
+pub use panicking::rust_panic_with_hook;
 
 #[path = "../../backtrace/src/lib.rs"]
 #[allow(dead_code, unused_attributes, fuzzy_provenance_casts)]

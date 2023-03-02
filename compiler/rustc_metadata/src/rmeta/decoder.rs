@@ -1697,6 +1697,14 @@ impl CrateMetadata {
         self.root.required_panic_strategy
     }
 
+    pub(crate) fn needs_panic_handler(&self) -> bool {
+        self.root.needs_panic_handler
+    }
+
+    pub(crate) fn has_panic_handler(&self) -> bool {
+        self.root.has_panic_handler
+    }
+
     pub(crate) fn needs_panic_runtime(&self) -> bool {
         self.root.needs_panic_runtime
     }

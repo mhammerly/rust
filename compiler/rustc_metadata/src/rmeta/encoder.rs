@@ -679,6 +679,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 debugger_visualizers,
                 compiler_builtins: tcx.sess.contains_name(&attrs, sym::compiler_builtins),
                 needs_allocator: tcx.sess.contains_name(&attrs, sym::needs_allocator),
+                needs_panic_handler: tcx.sess.contains_name(&attrs, sym::needs_panic_handler),
                 needs_panic_runtime: tcx.sess.contains_name(&attrs, sym::needs_panic_runtime),
                 no_builtins: tcx.sess.contains_name(&attrs, sym::no_builtins),
                 panic_runtime: tcx.sess.contains_name(&attrs, sym::panic_runtime),

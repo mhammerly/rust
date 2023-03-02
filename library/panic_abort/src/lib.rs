@@ -23,12 +23,14 @@ use core::panic::BoxMeUp;
 
 #[rustc_std_internal_symbol]
 #[allow(improper_ctypes_definitions)]
+#[no_mangle]
 pub unsafe extern "C" fn __rust_panic_cleanup(_: *mut u8) -> *mut (dyn Any + Send + 'static) {
     unreachable!()
 }
 
 // "Leak" the payload and shim to the relevant abort on the platform in question.
 #[rustc_std_internal_symbol]
+#[no_mangle]
 pub unsafe fn __rust_start_panic(_payload: *mut &mut dyn BoxMeUp) -> u32 {
     // Android has the ability to attach a message as part of the abort.
     #[cfg(target_os = "android")]

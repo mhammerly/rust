@@ -92,6 +92,7 @@ extern "C" {
 
 #[rustc_std_internal_symbol]
 #[allow(improper_ctypes_definitions)]
+#[no_mangle]
 pub unsafe extern "C" fn __rust_panic_cleanup(payload: *mut u8) -> *mut (dyn Any + Send + 'static) {
     Box::into_raw(imp::cleanup(payload))
 }
@@ -99,6 +100,7 @@ pub unsafe extern "C" fn __rust_panic_cleanup(payload: *mut u8) -> *mut (dyn Any
 // Entry point for raising an exception, just delegates to the platform-specific
 // implementation.
 #[rustc_std_internal_symbol]
+#[no_mangle]
 pub unsafe fn __rust_start_panic(payload: *mut &mut dyn BoxMeUp) -> u32 {
     let payload = Box::from_raw((*payload).take_box());
 

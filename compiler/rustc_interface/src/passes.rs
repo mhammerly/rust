@@ -425,6 +425,21 @@ pub fn configure_and_expand(
                 }
             }
         });
+
+        sess.time("maybe_inject_panic_handler", || {
+            let panic_handler = resolver.crate_loader().find_panic_handler(&krate);
+            if let Some(panic_handler) = panic_handler {
+                if !panic_handler.is_some() {
+                    // mattmatt no reason this needs to be allocator-specific
+                    rustc_builtin_macros::extern_allocator_crate::inject(
+                        sess,
+                        resolver,
+                        &mut krate,
+                        sym::panic_handler,
+                    )
+                }
+            }
+        });
     }
 
     // Done with macro expansion!

@@ -1,8 +1,20 @@
 #![feature(alloc_error_handler)]
 #![feature(core_panic)]
-#![no_std]
+// we can't even build an empty crate as no_std dylib until after bootstrapping;
+// it'll be missing eh_personality and the compiler doesn't know that's okay
+// mattmatt maaaaybe we don't actually need no_std at all
+// #![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), no_std)]
 
-use alloc::alloc::Layout;
+// depending on std, but need to get core::panicking::panic_nounwind_fmt
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+extern crate core;
+
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+use std::alloc::Layout;
+
+// if we need no_std use below
+//#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+//use alloc::alloc::Layout;
 
 // mattmatt below is __rdl_oom() which i guess is just for no_std crates?
 // library/std/src/alloc.rs has a #[alloc_error_handler] impl which has runtime hooks
@@ -11,7 +23,8 @@ use alloc::alloc::Layout;
 // __rdl_oom impl to no_std crates. either keep the bad codegen shim or inject a different extern
 // statement depending on whether local crate is no_std
 
-#[alloc_error_handler]
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+#[cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), alloc_error_handler)]
 pub unsafe fn on_oom(layout: Layout) -> ! {
     extern "Rust" {
         // This symbol is emitted by rustc next to __rust_alloc_error_handler.

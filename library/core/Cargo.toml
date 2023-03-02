@@ -11,6 +11,8 @@ autobenches = false
 edition = "2021"
 
 [lib]
+#crate-type = ["rlib"] # uncomment this when using downloaded stage0
+crate-type = ["dylib", "rlib"] # copy stage1 to another dir, use it as stage0, and uncomment this
 test = false
 bench = false
 
@@ -33,3 +35,4 @@ panic_immediate_abort = []
 # Make `RefCell` store additional debugging information, which is printed out when
 # a borrow error occurs
 debug_refcell = []
+unified-sysroot-injection = []

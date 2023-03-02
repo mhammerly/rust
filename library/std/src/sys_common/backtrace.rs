@@ -130,6 +130,7 @@ where
 /// this is only inline(never) when backtraces in std are enabled, otherwise
 /// it's fine to optimize away.
 #[cfg_attr(feature = "backtrace", inline(never))]
+#[stable(feature = "panic_hooks", since = "1.10.0")] // mattmatt cheating
 pub fn __rust_end_short_backtrace<F, T>(f: F) -> T
 where
     F: FnOnce() -> T,
