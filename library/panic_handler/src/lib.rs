@@ -1,10 +1,14 @@
 #![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), feature(panic_can_unwind))]
-#![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), feature(panic_info_message))]
+#![cfg_attr(
+    all(not(bootstrap), feature = "unified-sysroot-injection"),
+    feature(panic_info_message)
+)]
 #![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), feature(std_internals))]
-
-#![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), feature(needs_panic_runtime))]
+#![cfg_attr(
+    all(not(bootstrap), feature = "unified-sysroot-injection"),
+    feature(needs_panic_runtime)
+)]
 #![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), needs_panic_runtime)]
-
 // Library features (unwind):
 #![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), feature(panic_unwind))]
 
@@ -13,11 +17,11 @@
 // #![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), deny(ffi_unwind_calls))]
 
 #[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+use core::mem;
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
 use core::panic::{BoxMeUp, PanicInfo};
 #[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
 use std::rust_panic_with_hook;
-#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
-use core::mem;
 
 #[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
 use std::any::Any;
@@ -81,8 +85,9 @@ pub fn begin_panic_handler(info: &PanicInfo<'_>) -> ! {
 
     let loc = info.location().unwrap(); // The current implementation always returns Some
     let msg = info.message().unwrap(); // The current implementation always returns Some
-    std::__rust_end_short_backtrace(move || { // mattmatt
-                                              // std::sys_common::backtrace::__rust_end_short_backtrace
+    std::__rust_end_short_backtrace(move || {
+        // mattmatt
+        // std::sys_common::backtrace::__rust_end_short_backtrace
         if let Some(msg) = msg.as_str() {
             rust_panic_with_hook(&mut StrPanicPayload(msg), info.message(), loc, info.can_unwind());
         } else {

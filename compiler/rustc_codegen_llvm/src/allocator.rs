@@ -71,8 +71,8 @@ pub(crate) unsafe fn codegen(
         let callee = kind.fn_name(method.name);
         let callee =
             llvm::LLVMRustGetOrInsertFunction(llmod, callee.as_ptr().cast(), callee.len(), ty);
-        llvm::LLVMRustSetVisibility(callee, llvm::Visibility::Default); // mattmatt originally
-                                                                       // hidden
+        // mattmatt originally hidden
+        llvm::LLVMRustSetVisibility(callee, llvm::Visibility::Default);
 
         let llbb = llvm::LLVMAppendBasicBlockInContext(llcx, llfn, "entry\0".as_ptr().cast());
 

@@ -405,6 +405,7 @@ pub fn configure_and_expand(
 
     if sess.opts.unstable_opts.unified_sysroot_injection {
         sess.time("maybe_inject_allocator_crates", || {
+            println!("mattmatt maybe injecting allocators");
             let allocator_crates = resolver.crate_loader().find_allocator_crates(&krate);
             if let Some((global_allocator, alloc_error_handler)) = allocator_crates {
                 if !global_allocator.is_some() {
