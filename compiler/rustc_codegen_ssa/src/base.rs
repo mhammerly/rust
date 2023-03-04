@@ -619,14 +619,20 @@ pub fn codegen_crate<B: ExtraBackendMethods>(
     // If the crate doesn't have an `allocator_kind` set then there's definitely
     // no shim to generate. Otherwise we also check our dependency graph for all
     // our output crate types. If anything there looks like its a `Dynamic`
-    // linkage, then it's already got an allocator shim and we'll be using that
+    // linkage, then it's already got an allocator shim* and we'll be using that
     // one instead. If nothing exists then it's our job to generate the
     // allocator!
+    //
+    // If `-Z incomplete_dylibs` is enabled, we can't assume that. Regular dylibs won't have an
+    // allocator shim but cdylibs will. If you have a cdylib in your dependency graph, you will
+    // have a duplicated shim. If `-Z unified_sysroot_injection` becomes default and we change
+    // `#[global_allocator]` to generate allocator symbols directly, all this allocator codegen
+    // can be deleted and this edge case along with it.
     let any_dynamic_crate = tcx.dependency_formats(()).iter().any(|(_, list)| {
         use rustc_middle::middle::dependency_format::Linkage;
         list.iter().any(|&linkage| linkage == Linkage::Dynamic)
     });
-    let allocator_module = if any_dynamic_crate {
+    let allocator_module = if any_dynamic_crate && !tcx.sess.opts.unstable_opts.incomplete_dylibs {
         None
     } else if let Some(kind) = tcx.allocator_kind(()) {
         let llmod_id =

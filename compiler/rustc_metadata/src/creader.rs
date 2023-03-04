@@ -700,10 +700,15 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
     }
 
     fn inject_panic_runtime(&mut self, krate: &ast::Crate) {
-        // If we're only compiling an rlib, then there's no need to select a
-        // panic runtime, so we just skip this section entirely.
-        let any_non_rlib = self.sess.crate_types().iter().any(|ct| *ct != CrateType::Rlib);
-        if !any_non_rlib {
+        // Only "final" crate types need a panic runtime. An rlib is never final, and a dylib
+        // is non-final if `-Z incomplete_dylibs` is enabled.
+        let needs_runtime_predicate = if self.sess.opts.unstable_opts.incomplete_dylibs {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib) && !matches!(*ct, CrateType::Dylib)
+        } else {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib)
+        };
+        let needs_runtime = self.sess.crate_types().iter().any(needs_runtime_predicate);
+        if !needs_runtime {
             info!("panic runtime injection skipped, only generating rlib");
             return;
         }
@@ -828,8 +833,14 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         // At this point we've determined that we need an allocator. Let's see
         // if our compilation session actually needs an allocator based on what
         // we're emitting.
-        let all_rlib = self.sess.crate_types().iter().all(|ct| matches!(*ct, CrateType::Rlib));
-        if all_rlib {
+        let needs_allocator_crates_predicate = if self.sess.opts.unstable_opts.incomplete_dylibs {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib) && !matches!(*ct, CrateType::Dylib)
+        } else {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib)
+        };
+        let needs_allocator_crates =
+            self.sess.crate_types().iter().any(needs_allocator_crates_predicate);
+        if !needs_allocator_crates {
             return;
         }
 
