@@ -52,6 +52,7 @@ mod util;
 
 pub mod asm;
 pub mod cmdline_attrs;
+pub mod extern_crate_statement;
 pub mod proc_macro_harness;
 pub mod standard_library_imports;
 pub mod test_harness;

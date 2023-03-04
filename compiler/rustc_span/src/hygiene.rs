@@ -1118,6 +1118,7 @@ impl MacroKind {
 #[derive(Clone, Copy, Debug, PartialEq, Encodable, Decodable, HashStable_Generic)]
 pub enum AstPass {
     StdImports,
+    ExternCrateInjection,
     TestHarness,
     ProcMacroHarness,
 }
@@ -1126,6 +1127,7 @@ impl AstPass {
     pub fn descr(self) -> &'static str {
         match self {
             AstPass::StdImports => "standard library imports",
+            AstPass::ExternCrateInjection => "extern crate injection",
             AstPass::TestHarness => "test harness",
             AstPass::ProcMacroHarness => "proc macro harness",
         }

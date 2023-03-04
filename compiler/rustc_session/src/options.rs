@@ -1740,6 +1740,8 @@ options! {
         "select processor to schedule for (`rustc --print target-cpus` for details)"),
     ui_testing: bool = (false, parse_bool, [UNTRACKED],
         "emit compiler diagnostics in a form suitable for UI testing (default: no)"),
+    unified_sysroot_injection: bool = (false, parse_bool, [UNTRACKED], // mattmatt need issue
+        "inject allocator and panic dependencies into the AST"),
     uninit_const_chunk_threshold: usize = (16, parse_number, [TRACKED],
         "allow generating const initializers with mixed init/uninit chunks, \
         and set the maximum number of chunks for which this is allowed (default: 16)"),
