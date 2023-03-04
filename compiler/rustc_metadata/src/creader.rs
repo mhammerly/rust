@@ -804,7 +804,10 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         }
     }
 
-    fn inject_allocator_crate(&mut self, krate: &ast::Crate) {
+    pub fn find_allocator_crates(
+        &mut self,
+        krate: &ast::Crate,
+    ) -> Option<(Option<Symbol>, Option<Symbol>)> {
         self.cstore.has_global_allocator = match &*global_allocator_spans(&self.sess, krate) {
             [span1, span2, ..] => {
                 self.sess.emit_err(errors::NoMultipleGlobalAlloc { span2: *span2, span1: *span1 });
@@ -827,7 +830,7 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         if !self.sess.contains_name(&krate.attrs, sym::needs_allocator)
             && !self.cstore.iter_crate_data().any(|(_, data)| data.needs_allocator())
         {
-            return;
+            return None;
         }
 
         // At this point we've determined that we need an allocator. Let's see
@@ -841,7 +844,7 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         let needs_allocator_crates =
             self.sess.crate_types().iter().any(needs_allocator_crates_predicate);
         if !needs_allocator_crates {
-            return;
+            return None;
         }
 
         // Ok, we need an allocator. Not only that but we're actually going to
@@ -882,6 +885,18 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
             }
         }
 
+        // When this flag is enabled, we always use the global allocator. If `#[global_allocator]`
+        // is changed to generate `__rust_*` symbols directly, this becomes unnecessary.
+        if self.sess.opts.unstable_opts.unified_sysroot_injection {
+            self.cstore.allocator_kind = Some(AllocatorKind::Global);
+            self.cstore.alloc_error_handler_kind = Some(AllocatorKind::Global);
+        }
+
+        Some((global_allocator, alloc_error_handler))
+    }
+
+    fn inject_allocator_crate(&mut self, krate: &ast::Crate) {
+        let Some((global_allocator, alloc_error_handler)) = self.find_allocator_crates(krate) else { return; };
         if global_allocator.is_some() {
             self.cstore.allocator_kind = Some(AllocatorKind::Global);
         } else {
@@ -983,8 +998,13 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
     }
 
     pub fn postprocess(&mut self, krate: &ast::Crate) {
+        // When `-Z unified_sysroot_injection` is enabled, allocator crates are injected into the
+        // AST.
+        if !self.sess.opts.unstable_opts.unified_sysroot_injection {
+            self.inject_allocator_crate(krate);
+        }
+
         self.inject_profiler_runtime(krate);
-        self.inject_allocator_crate(krate);
         self.inject_panic_runtime(krate);
 
         self.report_unused_deps(krate);

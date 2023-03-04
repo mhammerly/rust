@@ -590,6 +590,7 @@ symbols! {
         declare_lint_pass,
         decode,
         default_alloc_error_handler,
+        default_global_allocator,
         default_lib_allocator,
         default_method_body_is_const,
         default_type_parameter_fallback,

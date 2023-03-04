@@ -300,6 +300,30 @@ fn configure_and_expand(mut krate: ast::Crate, resolver: &mut Resolver<'_, '_>) 
         )
     });
 
+    if sess.opts.unstable_opts.unified_sysroot_injection {
+        sess.time("maybe_inject_allocator_crates", || {
+            let allocator_crates = resolver.crate_loader(|c| c.find_allocator_crates(&krate));
+            if let Some((global_allocator, alloc_error_handler)) = allocator_crates {
+                if !global_allocator.is_some() {
+                    rustc_builtin_macros::extern_crate_statement::inject(
+                        sess,
+                        resolver,
+                        &mut krate,
+                        sym::default_global_allocator,
+                    )
+                }
+                if !alloc_error_handler.is_some() {
+                    rustc_builtin_macros::extern_crate_statement::inject(
+                        sess,
+                        resolver,
+                        &mut krate,
+                        sym::default_alloc_error_handler,
+                    )
+                }
+            }
+        });
+    }
+
     // Done with macro expansion!
 
     if sess.opts.unstable_opts.input_stats {

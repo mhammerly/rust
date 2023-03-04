@@ -1166,6 +1166,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "default_alloc_error_handler"
+version = "0.0.0"
+dependencies = [
+ "alloc",
+ "compiler_builtins",
+ "core",
+ "panic_abort",
+ "panic_unwind",
+ "std",
+]
+
+[[package]]
+name = "default_global_allocator"
+version = "0.0.0"
+dependencies = [
+ "panic_abort",
+ "panic_unwind",
+ "std",
+]
+
+[[package]]
 name = "der"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5486,6 +5507,8 @@ name = "test"
 version = "0.0.0"
 dependencies = [
  "core",
+ "default_alloc_error_handler",
+ "default_global_allocator",
  "getopts",
  "panic_abort",
  "panic_unwind",

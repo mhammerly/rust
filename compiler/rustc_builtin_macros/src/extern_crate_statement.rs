@@ -20,7 +20,8 @@ pub fn inject(
     let ecfg = ExpansionConfig::default("extern_crate_injection".to_string());
     let mut cx = ExtCtxt::new(sess, ecfg, resolver, None);
 
-    let expn_id = cx.resolver.expansion_for_ast_pass(DUMMY_SP, AstPass::ExternCrateInjection, &[], None);
+    let expn_id =
+        cx.resolver.expansion_for_ast_pass(DUMMY_SP, AstPass::ExternCrateInjection, &[], None);
 
     let span = DUMMY_SP.with_def_site_ctxt(expn_id.to_expn_id());
     let call_site = DUMMY_SP.with_call_site_ctxt(expn_id.to_expn_id());

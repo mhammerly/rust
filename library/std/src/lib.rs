@@ -358,7 +358,7 @@
 #![feature(const_ipv6)]
 #![feature(thread_local_internals)]
 //
-#![default_lib_allocator]
+#![cfg_attr(any(bootstrap, not(feature = "unified-sysroot-injection")), default_lib_allocator)]
 
 // Explicitly import the prelude. The compiler uses this same unstable attribute
 // to import the prelude implicitly when building crates that depend on std.
