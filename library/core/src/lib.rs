@@ -184,6 +184,11 @@
 #![feature(const_cstr_methods)]
 #![feature(ip)]
 #![feature(is_ascii_octdigit)]
+#![cfg_attr(
+    all(not(bootstrap), feature = "unified-sysroot-injection"),
+    feature(needs_panic_handler)
+)]
+#![cfg_attr(all(not(bootstrap), feature = "unified-sysroot-injection"), needs_panic_handler)]
 //
 // Language features:
 #![feature(abi_unadjusted)]

@@ -322,6 +322,20 @@ fn configure_and_expand(mut krate: ast::Crate, resolver: &mut Resolver<'_, '_>) 
                 }
             }
         });
+
+        sess.time("maybe_inject_panic_handler", || {
+            let panic_handler = resolver.crate_loader(|c| c.find_panic_handler(&krate));
+            if let Some(panic_handler) = panic_handler {
+                if !panic_handler.is_some() {
+                    rustc_builtin_macros::extern_crate_statement::inject(
+                        sess,
+                        resolver,
+                        &mut krate,
+                        sym::default_panic_handler,
+                    )
+                }
+            }
+        });
     }
 
     // Done with macro expansion!

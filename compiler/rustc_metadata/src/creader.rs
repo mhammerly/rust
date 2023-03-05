@@ -699,6 +699,53 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         Ok(unsafe { **sym })
     }
 
+    pub fn find_panic_handler(&self, krate: &ast::Crate) -> Option<Option<Symbol>> {
+        let needs_panic_handler_predicate = if self.sess.opts.unstable_opts.incomplete_dylibs {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib) && !matches!(*ct, CrateType::Dylib)
+        } else {
+            |ct: &CrateType| !matches!(*ct, CrateType::Rlib)
+        };
+        let mut needs_panic_handler =
+            self.sess.crate_types().iter().any(needs_panic_handler_predicate);
+        if !needs_panic_handler {
+            return None;
+        }
+
+        needs_panic_handler = self.sess.contains_name(&krate.attrs, sym::needs_panic_handler);
+        needs_panic_handler = self
+            .cstore
+            .iter_crate_data()
+            .fold(needs_panic_handler, |acc, (_, data)| acc || data.needs_panic_handler());
+        if !needs_panic_handler {
+            return None;
+        }
+
+        let has_panic_handler = match &*panic_handler_spans(&self.sess, krate) {
+            [span1, span2, ..] => {
+                self.sess.emit_err(errors::NoMultiplePanicHandler { span2: *span2, span1: *span1 });
+                true
+            }
+            spans => !spans.is_empty(),
+        };
+
+        let mut panic_handler = has_panic_handler.then(|| Symbol::intern("this crate"));
+        for (_, data) in self.cstore.iter_crate_data() {
+            if data.has_panic_handler() {
+                match panic_handler {
+                    Some(other_crate) => {
+                        self.sess.emit_err(errors::ConflictingPanicHandler {
+                            crate_name: data.name(),
+                            other_crate_name: other_crate,
+                        });
+                    }
+                    None => panic_handler = Some(data.name()),
+                }
+            }
+        }
+
+        Some(panic_handler)
+    }
+
     fn inject_panic_runtime(&mut self, krate: &ast::Crate) {
         // Only "final" crate types need a panic runtime. An rlib is never final, and a dylib
         // is non-final if `-Z incomplete_dylibs` is enabled.
@@ -1075,6 +1122,25 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
     pub fn maybe_process_path_extern(&mut self, name: Symbol) -> Option<CrateNum> {
         self.maybe_resolve_crate(name, CrateDepKind::Explicit, None).ok()
     }
+}
+
+fn panic_handler_spans(sess: &Session, krate: &ast::Crate) -> Vec<Span> {
+    struct Finder<'a> {
+        sess: &'a Session,
+        spans: Vec<Span>,
+    }
+    impl<'ast, 'a> visit::Visitor<'ast> for Finder<'a> {
+        fn visit_item(&mut self, item: &'ast ast::Item) {
+            if self.sess.contains_name(&item.attrs, sym::panic_handler) {
+                self.spans.push(item.span);
+            }
+            visit::walk_item(self, item)
+        }
+    }
+
+    let mut f = Finder { sess, spans: Vec::new() };
+    visit::walk_crate(&mut f, krate);
+    f.spans
 }
 
 fn global_allocator_spans(sess: &Session, krate: &ast::Crate) -> Vec<Span> {

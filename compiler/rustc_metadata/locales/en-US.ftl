@@ -148,6 +148,13 @@ metadata_profiler_builtins_needs_core =
 metadata_not_profiler_runtime =
     the crate `{$crate_name}` is not a profiler runtime
 
+metadata_no_multiple_panic_handler =
+    cannot define multiple panic handlers
+    .label = cannot define a new panic handler
+
+metadata_prev_panic_handler =
+    previous panic handler defined here
+
 metadata_no_multiple_global_alloc =
     cannot define multiple global allocators
     .label = cannot define a new global allocator
@@ -161,6 +168,9 @@ metadata_no_multiple_alloc_error_handler =
 
 metadata_prev_alloc_error_handler =
     previous allocation error handler defined here
+
+metadata_conflicting_panic_handler =
+    the `#[panic_handler]` in {$other_crate_name} conflicts with panic handler in: {$crate_name}
 
 metadata_conflicting_global_alloc =
     the `#[global_allocator]` in {$other_crate_name} conflicts with global allocator in: {$crate_name}

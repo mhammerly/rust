@@ -598,6 +598,14 @@ mod personality;
 #[allow(dead_code, unused_attributes, fuzzy_provenance_casts)]
 mod backtrace_rs;
 
+// mattmatt cheating:
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+pub use panicking::rust_panic_with_hook;
+#[cfg(all(not(bootstrap), feature = "unified-sysroot-injection"))]
+#[stable(feature = "panic_hooks", since = "1.10.0")]
+pub use sys_common::backtrace::__rust_end_short_backtrace;
+
 // Re-export macros defined in core.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated, deprecated_in_future)]
