@@ -1442,7 +1442,7 @@ options! {
         "generate human-readable, predictable names for codegen units (default: no)"),
     identify_regions: bool = (false, parse_bool, [UNTRACKED],
         "display unnamed regions as `'<id>`, using a non-ident unique id (default: no)"),
-    incomplete_dylibs: bool = (false, parse_bool, [UNTRACKED], // mattmatt need issue
+    incomplete_dylibs: bool = (true, parse_bool, [UNTRACKED], // mattmatt need issue
         "build dylib crates (not cdylib) without injecting allocator or panic implementations, mirroring rlib"),
     incremental_ignore_spans: bool = (false, parse_bool, [TRACKED],
         "ignore spans during ICH computation -- used for testing (default: no)"),
@@ -1740,7 +1740,7 @@ options! {
         "select processor to schedule for (`rustc --print target-cpus` for details)"),
     ui_testing: bool = (false, parse_bool, [UNTRACKED],
         "emit compiler diagnostics in a form suitable for UI testing (default: no)"),
-    unified_sysroot_injection: bool = (false, parse_bool, [UNTRACKED], // mattmatt need issue
+    unified_sysroot_injection: bool = (true, parse_bool, [UNTRACKED], // mattmatt need issue
         "inject allocator and panic dependencies into the AST"),
     uninit_const_chunk_threshold: usize = (16, parse_number, [TRACKED],
         "allow generating const initializers with mixed init/uninit chunks, \

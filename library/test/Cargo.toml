@@ -21,7 +21,7 @@ default_panic_handler = { path = "../default_panic_handler", optional = true }
 
 # Forward features to the `std` crate as necessary
 [features]
-default = ["std_detect_file_io", "std_detect_dlsym_getauxval", "panic-unwind"]
+default = ["std_detect_file_io", "std_detect_dlsym_getauxval", "panic-unwind", "unified-sysroot-injection"]
 backtrace = ["std/backtrace"]
 compiler-builtins-c = ["std/compiler-builtins-c"]
 compiler-builtins-mem = ["std/compiler-builtins-mem"]
