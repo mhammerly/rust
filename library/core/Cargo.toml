@@ -14,6 +14,8 @@ edition = "2021"
 test = false
 bench = false
 
+crate-type = ["rlib", "dylib"]
+
 [[test]]
 name = "coretests"
 path = "tests/lib.rs"
